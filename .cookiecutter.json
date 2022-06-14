@@ -1,0 +1,11 @@
+{
+  "_output_dir": "E:\\Repos",
+  "_template": "gh:oncleben31/cookiecutter-homeassistant-custom-component",
+  "class_name_prefix": "XiaomiCloudMapExtractor",
+  "domain_name": "xiaomi_cloud_map_extractor",
+  "friendly_name": "Xiaomi-Cloud-Map-Extractor",
+  "github_user": "tobi1449",
+  "project_name": "xiaomi-cloud-map-extractor",
+  "test_suite": "yes",
+  "version": "0.0.0"
+}

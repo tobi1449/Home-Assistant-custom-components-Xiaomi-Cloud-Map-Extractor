@@ -1,0 +1,19 @@
+default_config:
+
+logger:
+  default: info
+  logs:
+    custom_components.xiaomi_cloud_map_extractor: debug
+# If you need to debug uncommment the line below (doc: https://www.home-assistant.io/integrations/debugpy/)
+debugpy:
+
+camera:
+  - platform: xiaomi_cloud_map_extractor
+    use_valetudo: true
+    host: raspi.home
+    token: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    username: mapextractor
+    password: test
+    draw: ['all']
+    attributes:
+      - calibration_points
