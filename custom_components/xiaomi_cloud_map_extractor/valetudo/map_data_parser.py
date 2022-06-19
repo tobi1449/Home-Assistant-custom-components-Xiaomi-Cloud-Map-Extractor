@@ -1,7 +1,6 @@
 import json
 import logging
 from typing import Tuple
-from PIL import Image
 
 from custom_components.xiaomi_cloud_map_extractor.common.map_data import (
     Area,
