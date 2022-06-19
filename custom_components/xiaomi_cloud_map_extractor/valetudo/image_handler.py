@@ -30,13 +30,22 @@ class ImageHandlerValetudo(ImageHandler):
         WALL = 2
 
     @staticmethod
+    def draw_pixel(image: Image, x: int, y: int, pixel_size: int, room_color):
+        x = x * pixel_size
+        y = y * pixel_size
+        for j in range(0, pixel_size):
+            for k in range(0, pixel_size):
+                image.putpixel((x + j, y + k), room_color)
+
+    @staticmethod
     def draw(
-        walls: list[int],
-        rooms: list[Tuple[Room, list[int]]],
-        image_width,
-        image_height,
-        colors,
-        image_config,
+            walls: list[int],
+            rooms: list[Tuple[Room, list[int]]],
+            image_width,
+            image_height,
+            colors,
+            image_config,
+            pixel_size
     ) -> ImageType:
         scale = image_config[CONF_SCALE]
         trim_left = int(image_config[CONF_TRIM][CONF_LEFT] * image_width / 100)
@@ -58,14 +67,14 @@ class ImageHandlerValetudo(ImageHandler):
             for i in range(0, len(px_room), 2):
                 x = px_room[i] - trim_left
                 y = px_room[i + 1] + trim_top
-                image.putpixel((x, y), room_color)
+                ImageHandlerValetudo.draw_pixel(image, x, y, pixel_size, room_color)
 
         wall_color = ImageHandler.__get_color__(COLOR_MAP_WALL, colors)
 
         for i in range(0, len(walls), 2):
             x = walls[i] - trim_left
             y = walls[i + 1] - trim_bottom
-            image.putpixel((x, y), wall_color)
+            ImageHandlerValetudo.draw_pixel(image, x, y, pixel_size, wall_color)
 
         if image_config["scale"] != 1 and image_width != 0 and image_height != 0:
             image = image.resize(
@@ -74,3 +83,4 @@ class ImageHandlerValetudo(ImageHandler):
             )
 
         return image
+
