@@ -3,8 +3,8 @@ from typing import Optional
 from custom_components.xiaomi_cloud_map_extractor.common.map_data import MapData
 from custom_components.xiaomi_cloud_map_extractor.common.vacuum_v2 import XiaomiCloudVacuumV2
 from custom_components.xiaomi_cloud_map_extractor.common.xiaomi_cloud_connector import Connector
-from custom_components.xiaomi_cloud_map_extractor.valetudo.map_data_parser import MapDataParserValetudo
 from custom_components.xiaomi_cloud_map_extractor.types import Colors, Drawables, ImageConfig, Sizes, Texts
+from custom_components.xiaomi_cloud_map_extractor.valetudo.map_data_parser import MapDataParserValetudo
 
 
 class ValetudoVacuum(XiaomiCloudVacuumV2):
