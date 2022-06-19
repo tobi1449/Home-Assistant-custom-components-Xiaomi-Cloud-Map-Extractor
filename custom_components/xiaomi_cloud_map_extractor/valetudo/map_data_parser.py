@@ -1,6 +1,7 @@
 import json
 import logging
 from typing import Tuple
+from PIL import Image
 
 from custom_components.xiaomi_cloud_map_extractor.common.map_data import (
     Area,
@@ -23,34 +24,27 @@ _LOGGER = logging.getLogger(__name__)
 
 class MapDataParserValetudo(MapDataParser):
     @staticmethod
-    def map_to_image(p: Point, pixel_size: int) -> Point:
-        return Point(p.x / pixel_size, p.y / pixel_size)
+    def map_to_image(point: Point, height: int) -> Point:
+        return Point(point.x, height - point.y)
 
     @staticmethod
-    def parse_points(coordinates, pixel_size) -> list[Point]:
+    def parse_points(coordinates) -> list[Point]:
         points = []
 
         for index in range(0, len(coordinates), 2):
-            points.append(
-                MapDataParserValetudo.map_to_image(
-                    Point(coordinates[index], coordinates[index + 1]), pixel_size
-                )
-            )
+            points.append(Point(coordinates[index], coordinates[index + 1]))
 
         return points
 
     @staticmethod
-    def parse_point_map_entity(entity, pixel_size) -> Point:
-        return MapDataParserValetudo.map_to_image(
-            Point(
-                entity["points"][0], entity["points"][1], entity["metaData"]["angle"]
-            ),
-            pixel_size,
+    def parse_point_map_entity(entity) -> Point:
+        return Point(
+            entity["points"][0], entity["points"][1], entity["metaData"]["angle"]
         )
 
     @staticmethod
-    def parse_polygon_map_entity(entity, pixel_size) -> Area:
-        points = MapDataParserValetudo.parse_points(entity["points"], pixel_size)
+    def parse_polygon_map_entity(entity) -> Area:
+        points = MapDataParserValetudo.parse_points(entity["points"])
 
         return Area(
             points[0].x,
@@ -64,8 +58,8 @@ class MapDataParserValetudo(MapDataParser):
         )
 
     @staticmethod
-    def parse_line_map_entity(entity, pixel_size) -> Wall:
-        points = MapDataParserValetudo.parse_points(entity["points"], pixel_size)
+    def parse_line_map_entity(entity) -> Wall:
+        points = MapDataParserValetudo.parse_points(entity["points"])
 
         return Wall(points[0].x, points[0].y, points[1].x, points[1].y)
 
@@ -77,7 +71,7 @@ class MapDataParserValetudo(MapDataParser):
             y = compressed_pixels[i + 1]
             count = compressed_pixels[i + 2]
             for j in range(0, count):
-                pixels.append(x_start + j)
+                pixels.append((x_start + j))
                 pixels.append(y)
         return pixels
 
@@ -109,55 +103,48 @@ class MapDataParserValetudo(MapDataParser):
         ), MapDataParserValetudo.decompress_pixels(layer["compressedPixels"])
 
     @staticmethod
-    def parse_path_map_entity(entity, pixel_size) -> Path:
-        return Path(
-            None,
-            None,
-            None,
-            [MapDataParserValetudo.parse_points(entity["points"], pixel_size)],
-        )
+    def parse_path_map_entity(entity) -> list[Point]:
+        return MapDataParserValetudo.parse_points(entity["points"])
 
     @staticmethod
     def decode_map(
         raw_map: str, colors, drawables, texts, sizes, image_config
     ) -> MapData:
-        _LOGGER.debug(f"decoding map")
 
         map_data = MapData()
         map_data.no_go_areas = []
         map_data.no_mopping_areas = []
         map_data.walls = []
-        map_data.rooms = []
 
         map_object = json.loads(raw_map)
 
-        pixel_size = 1 #int(map_object["pixelSize"])
+        pixel_size = int(map_object["pixelSize"])
+
+        paths = []
 
         for entity in map_object["entities"]:
             if entity["type"] == "robot_position":
                 map_data.vacuum_position = MapDataParserValetudo.parse_point_map_entity(
-                    entity, pixel_size
+                    entity
                 )
             elif entity["type"] == "charger_location":
-                map_data.charger = MapDataParserValetudo.parse_point_map_entity(
-                    entity, pixel_size
-                )
+                map_data.charger = MapDataParserValetudo.parse_point_map_entity(entity)
             elif entity["type"] == "no_go_area":
                 map_data.no_go_areas.append(
-                    MapDataParserValetudo.parse_polygon_map_entity(entity, pixel_size)
+                    MapDataParserValetudo.parse_polygon_map_entity(entity)
                 )
             elif entity["type"] == "no_mop_area":
                 map_data.no_mopping_areas.append(
-                    MapDataParserValetudo.parse_polygon_map_entity(entity, pixel_size)
+                    MapDataParserValetudo.parse_polygon_map_entity(entity)
                 )
             elif entity["type"] == "virtual_wall":
                 map_data.walls.append(
-                    MapDataParserValetudo.parse_line_map_entity(entity, pixel_size)
+                    MapDataParserValetudo.parse_line_map_entity(entity)
                 )
             elif entity["type"] == "path":
-                map_data.path = MapDataParserValetudo.parse_path_map_entity(
-                    entity, pixel_size
-                )
+                paths.append(MapDataParserValetudo.parse_path_map_entity(entity))
+
+        map_data.path = Path(None, None, None, paths)
 
         walls = []
         rooms = []
@@ -169,28 +156,32 @@ class MapDataParserValetudo(MapDataParser):
 
         map_data.rooms = dict(map(lambda x: (x[0].number, x[0]), rooms))
 
+        width = map_object["size"]["x"]
+        height = map_object["size"]["y"]
+
         image = ImageHandlerValetudo.draw(
             walls,
             rooms,
-            map_object["size"]["x"],
-            map_object["size"]["y"],
+            width,
+            height,
             colors,
             image_config,
+            pixel_size,
         )
 
         box = image.getbbox()
         image = image.crop(box)
 
-        width, height = image.size
+        cropped_width, cropped_height = image.size
         map_data.image = ImageData(
             width * height,
-            0,
-            0,
-            height,
-            width,
+            -box[1],
+            box[0],
+            cropped_height,
+            cropped_width,
             image_config,
             image,
-            lambda p: MapDataParserValetudo.map_to_image(p, pixel_size),
+            lambda p: MapDataParserValetudo.map_to_image(p, cropped_height),
         )
 
         MapDataParserValetudo.draw_elements(
