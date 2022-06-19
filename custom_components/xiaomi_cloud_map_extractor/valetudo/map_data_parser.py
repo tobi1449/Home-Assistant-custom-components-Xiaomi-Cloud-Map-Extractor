@@ -1,3 +1,4 @@
+from cmath import pi
 import json
 import logging
 from typing import Tuple
@@ -79,7 +80,7 @@ class MapDataParserValetudo(MapDataParser):
         return MapDataParserValetudo.decompress_pixels(layer["compressedPixels"])
 
     @staticmethod
-    def parse_room(layer) -> Tuple[Room, list[int]]:
+    def parse_room(layer, pixel_size) -> Tuple[Room, list[int]]:
 
         dimensions = layer["dimensions"]
         meta_data = layer["metaData"]
@@ -91,14 +92,11 @@ class MapDataParserValetudo(MapDataParser):
         xmax = dimensions["x"]["max"]
         ymin = dimensions["y"]["min"]
         ymax = dimensions["y"]["max"]
+        xavg = dimensions["x"]["avg"] * pixel_size
+        yavg = dimensions["y"]["avg"] * pixel_size
 
         return Room(
-            segment_id,
-            xmin,
-            ymin,
-            xmax,
-            ymax,
-            name,
+            segment_id, xmin, ymin, xmax, ymax, name, xavg, yavg
         ), MapDataParserValetudo.decompress_pixels(layer["compressedPixels"])
 
     @staticmethod
@@ -151,7 +149,7 @@ class MapDataParserValetudo(MapDataParser):
             if layer["type"] == "wall":
                 walls = MapDataParserValetudo.parse_walls(layer)
             elif layer["type"] == "segment":
-                rooms.append(MapDataParserValetudo.parse_room(layer))
+                rooms.append(MapDataParserValetudo.parse_room(layer, pixel_size))
 
         map_data.rooms = dict(map(lambda x: (x[0].number, x[0]), rooms))
 
