@@ -39,13 +39,13 @@ class ImageHandlerValetudo(ImageHandler):
 
     @staticmethod
     def draw(
-            walls: list[int],
-            rooms: list[Tuple[Room, list[int]]],
-            image_width,
-            image_height,
-            colors,
-            image_config,
-            pixel_size
+        walls: list[int],
+        rooms: list[Tuple[Room, list[int]]],
+        image_width,
+        image_height,
+        colors,
+        image_config,
+        pixel_size,
     ) -> ImageType:
         scale = image_config[CONF_SCALE]
         trim_left = int(image_config[CONF_TRIM][CONF_LEFT] * image_width / 100)
@@ -83,4 +83,3 @@ class ImageHandlerValetudo(ImageHandler):
             )
 
         return image
-
