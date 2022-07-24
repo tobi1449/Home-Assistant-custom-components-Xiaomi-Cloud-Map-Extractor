@@ -427,6 +427,7 @@ This integration was tested on following vacuums:
  - Roidmi map format:
    - `roidmi.vacuum.v60` (Roidmi EVE Plus)
    - `viomi.vacuum.v18` (Viomi S9)
+   - `viomi.vacuum.v38` (Viomi V5 Pro)
    - `zhimi.vacuum.xa1` (Lydsto R1)
  - Dreame map format:
    - `dreame.vacuum.mc1808` (Xiaomi Mi Mop/Xiaomi Mijia 1C)
@@ -439,6 +440,11 @@ This integration was tested on following vacuums:
    - `dreame.vacuum.p2140` (Mijia Robot Vacuum-Mop 2C)
    - `dreame.vacuum.p2157` (MOVA L600)
    - `dreame.vacuum.p2259` (Dreame D9 Max)
+
+## Unsupported devices
+
+At this moment this integration is known to not work with following vacuums:
+ - Dreame ([#126](https://github.com/PiotrMachowski/Home-Assistant-custom-components-Xiaomi-Cloud-Map-Extractor/issues/126)):
 
 ## Retrieving map
 

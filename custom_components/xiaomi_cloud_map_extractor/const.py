@@ -211,7 +211,9 @@ AVAILABLE_APIS = {
 
 API_EXCEPTIONS = {
     "viomi.vacuum.v18": CONF_AVAILABLE_API_ROIDMI,
-    "valetudo": CONF_AVAILABLE_API_VALETUDO
+    "viomi.vacuum.v23": CONF_AVAILABLE_API_ROIDMI,
+    "viomi.vacuum.v38": CONF_AVAILABLE_API_ROIDMI,
+    "valetudo": CONF_AVAILABLE_API_VALETUDO,
 }
 
 MM = 50
